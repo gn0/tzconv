@@ -40,13 +40,17 @@ def main(from_tz, to_tz, date_time, debug=False):
 
     from_tz_name = from_tz_obj.tzname(base_dt)
 
-    print(f"{from_tz_name}: {base_dt.strftime('%Y-%m-%d %H:%M')}")
+    print(f"{from_tz_name}: ", end="")
+    print(f"{base_dt.strftime('%Y-%m-%d %H:%M')} ", end="")
+    print(f"({from_tz})")
 
     for to_tz_obj in to_tz_objs:
         to_tz_name = to_tz_obj.tzname(base_dt)
         to_tz_dt = base_dt.astimezone(to_tz_obj)
 
-        print(f"{to_tz_name}: {to_tz_dt.strftime('%Y-%m-%d %H:%M')}")
+        print(f"{to_tz_name}: ", end="")
+        print(f"{to_tz_dt.strftime('%Y-%m-%d %H:%M')} ", end="")
+        print(f"({to_tz_obj.key})")
 
 
 if __name__ == "__main__":
