@@ -9,6 +9,9 @@ import click
 
 
 def make_datetime(date_time: str, timezone: zi.ZoneInfo) -> dt.datetime:
+    """Construct a `datetime` instance from a date-time string formatted
+    as `YYYY-MM-DD HH:MM` and attach timezone information."""
+
     match = re.match(r"^(\d{4})-(\d{2})-(\d{2}) (\d{1,2}):(\d{2})$",
                      date_time)
 
@@ -27,6 +30,10 @@ def make_datetime(date_time: str, timezone: zi.ZoneInfo) -> dt.datetime:
 
 
 def format_datetime(obj: dt.datetime) -> str:
+    """Create a human-readable representation of a `datetime`
+    object. The resulting string includes the timezone's name and its
+    `zoneinfo` key."""
+
     tz_name = obj.tzname()
     tz_key = cast(zi.ZoneInfo, obj.tzinfo).key
 
