@@ -8,7 +8,7 @@ from typing import cast
 import click
 
 
-def make_datetime(date_time: str, tz: zi.ZoneInfo) -> dt.datetime:
+def make_datetime(date_time: str, timezone: zi.ZoneInfo) -> dt.datetime:
     match = re.match(r"^(\d{4})-(\d{2})-(\d{2}) (\d{1,2}):(\d{2})$",
                      date_time)
 
@@ -23,7 +23,7 @@ def make_datetime(date_time: str, tz: zi.ZoneInfo) -> dt.datetime:
         int(match.group(3)),
         int(match.group(4)),
         int(match.group(5)),
-        tzinfo=tz)
+        tzinfo=timezone)
 
 
 def format_datetime(obj: dt.datetime) -> str:
