@@ -3,6 +3,8 @@ import re
 import datetime as dt
 import zoneinfo as zi
 
+from typing import cast
+
 import click
 
 
@@ -24,6 +26,13 @@ def make_datetime(date_time: str, tz: zi.ZoneInfo) -> dt.datetime:
         tzinfo=tz)
 
 
+def format_datetime(obj: dt.datetime) -> str:
+    tz_name = obj.tzname()
+    tz_key = cast(zi.ZoneInfo, obj.tzinfo).key
+
+    return f"{tz_name}: {obj.strftime('%Y-%m-%d %H:%M')} ({tz_key})"
+
+
 @click.command()
 @click.option("-d", "--debug", is_flag=True)
 @click.option("-f", "--from-tz", required=True, type=str)
@@ -38,19 +47,12 @@ def main(from_tz, to_tz, date_time, debug=False):
 
     base_dt = make_datetime(date_time, from_tz_obj)
 
-    from_tz_name = from_tz_obj.tzname(base_dt)
+    print(format_datetime(base_dt))
 
-    print(f"{from_tz_name}: ", end="")
-    print(f"{base_dt.strftime('%Y-%m-%d %H:%M')} ", end="")
-    print(f"({from_tz})")
-
-    for to_tz_obj in to_tz_objs:
-        to_tz_name = to_tz_obj.tzname(base_dt)
-        to_tz_dt = base_dt.astimezone(to_tz_obj)
-
-        print(f"{to_tz_name}: ", end="")
-        print(f"{to_tz_dt.strftime('%Y-%m-%d %H:%M')} ", end="")
-        print(f"({to_tz_obj.key})")
+    for timezone in to_tz_objs:
+        print(
+            format_datetime(
+                base_dt.astimezone(timezone)))
 
 
 if __name__ == "__main__":
