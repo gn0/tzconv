@@ -1,9 +1,17 @@
 
 # `tzconv`: convert a date and time to several time zones at once
 
-This Python package provides a command-line utility to convert a `YYYY-MM-DD HH:MM` formatted date and time to several other time zones.
+This Python package provides a small command-line utility to convert a `YYYY-MM-DD HH:MM` formatted date and time to several other time zones.
 
 ## Installation
+
+`tzconv` is available through PyPI:
+
+```
+$ python3 -m pip install tzconv
+```
+
+Alternatively, you can install it directly from the Codeberg Git repository:
 
 ```
 $ git clone https://codeberg.org/gnyeki/tzconv
