@@ -12,8 +12,9 @@ def make_datetime(date_time: str, timezone: zi.ZoneInfo) -> dt.datetime:
     """Construct a `datetime` instance from a date-time string formatted
     as `YYYY-MM-DD HH:MM` and attach timezone information."""
 
-    match = re.match(r"^(\d{4})-(\d{2})-(\d{2}) (\d{1,2}):(\d{2})$",
-                     date_time)
+    match = re.match(
+        r"^\s*(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})\s*$",
+        date_time)
 
     if match is None:
         raise ValueError(
