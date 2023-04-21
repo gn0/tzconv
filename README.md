@@ -40,6 +40,24 @@ IST: 2023-04-25 19:30 (Asia/Calcutta)
 $
 ```
 
+If the date is omitted, it imputes today's date:
+
+```
+$ tzconv \
+    -f America/New_York \
+    -t America/Los_Angeles \
+    -t America/Halifax \
+    -t Asia/Karachi \
+    -t Asia/Calcutta \
+    "10:00"
+EDT: 2023-04-20 10:00 (America/New_York)
+PDT: 2023-04-20 07:00 (America/Los_Angeles)
+ADT: 2023-04-20 11:00 (America/Halifax)
+PKT: 2023-04-20 19:00 (Asia/Karachi)
+IST: 2023-04-20 19:30 (Asia/Calcutta)
+$
+```
+
 ### Daylight savings
 
 Daylight savings can complicate conversions.
