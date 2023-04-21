@@ -82,11 +82,9 @@ def print_time_zones(stub: str | None) -> None:
     """Print all available time zones whose names begin with `stub`.  If
     `stub` is `None`, then print everything."""
 
-    time_zones = zi.available_timezones()
+    time_zones = get_time_zones(stub)
 
     if stub is not None:
-        time_zones = get_time_zones(stub)
-
         if len(time_zones) == 0:
             print(f"No available time zone begins with '{stub}'.")
             return
