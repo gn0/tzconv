@@ -46,17 +46,46 @@ def format_datetime(obj: dt.datetime) -> str:
     return f"{tz_name}: {obj.strftime('%Y-%m-%d %H:%M')} ({tz_key})"
 
 
-def print_time_zones(stub):
+def get_time_zones(stub: str | None) -> set:
+    """Get the names of those time zones that match `stub`.  If `stub`
+    is None, then get all available time zones."""
+
+    time_zones = zi.available_timezones()
+
+    if stub is not None:
+        time_zones = set(
+            name
+            for name in time_zones
+            if name.lower().startswith(stub.lower()))
+
+    return time_zones
+
+
+def get_time_zone(stub: str) -> str:
+    """Get the name of the time zone that matches `stub`.  Raises
+    `ValueError` if there is no match or more than one match."""
+
+    time_zones = get_time_zones(stub)
+
+    if len(time_zones) == 0:
+        raise ValueError(f"No available time zone matches '{stub}'.")
+
+    if len(time_zones) > 1:
+        raise ValueError(
+            f"Multiple available time zones are matched by '{stub}': "
+            + f"{', '.join(sorted(time_zones))}.")
+
+    return time_zones.pop()
+
+
+def print_time_zones(stub: str | None) -> None:
     """Print all available time zones whose names begin with `stub`.  If
     `stub` is `None`, then print everything."""
 
     time_zones = zi.available_timezones()
 
     if stub is not None:
-        time_zones = set(
-            x
-            for x in time_zones
-            if x.lower().startswith(stub.lower()))
+        time_zones = get_time_zones(stub)
 
         if len(time_zones) == 0:
             print(f"No available time zone begins with '{stub}'.")
@@ -139,8 +168,8 @@ def main(from_tz, to_tz, date_time, list_tz=False, debug=False):
         print_argument_error_and_exit(
             "Must specify a date and time to convert.")
     else:
-        from_tz_obj = zi.ZoneInfo(from_tz)
-        to_tz_objs = [zi.ZoneInfo(x) for x in to_tz]
+        from_tz_obj = zi.ZoneInfo(get_time_zone(from_tz))
+        to_tz_objs = [zi.ZoneInfo(get_time_zone(x)) for x in to_tz]
 
         base_dt = make_datetime(date_time, from_tz_obj)
 
