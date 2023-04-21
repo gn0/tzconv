@@ -164,14 +164,14 @@ def main(from_tz, to_tz, date_time, list_tz=False, debug=False):
     elif len(to_tz) == 0:
         print_argument_error_and_exit(
             "Must specify --to-tz if using --from-tz.")
-    elif date_time is None:
-        print_argument_error_and_exit(
-            "Must specify a date and time to convert.")
     else:
         from_tz_obj = zi.ZoneInfo(get_time_zone(from_tz))
         to_tz_objs = [zi.ZoneInfo(get_time_zone(x)) for x in to_tz]
 
-        base_dt = make_datetime(date_time, from_tz_obj)
+        if date_time is None:
+            base_dt = dt.datetime.now(tz=from_tz_obj)
+        else:
+            base_dt = make_datetime(date_time, from_tz_obj)
 
         print(format_datetime(base_dt))
 
