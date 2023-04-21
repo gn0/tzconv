@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as handle:
 
 setup(
     name="tzconv",
-    version="1.0",
+    version="1.1",
     description="command-line tool to convert a date and time to several time zones at once",
     long_description=readme,
     long_description_content_type="text/markdown",
