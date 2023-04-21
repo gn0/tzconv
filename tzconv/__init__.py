@@ -10,24 +10,29 @@ import click
 
 def make_datetime(date_time: str, timezone: zi.ZoneInfo) -> dt.datetime:
     """Construct a `datetime` instance from a date-time string formatted
-    as `YYYY-MM-DD HH:MM` and attach timezone information."""
+    as `YYYY-MM-DD HH:MM` or `HH:MM` and attach timezone information."""
 
-    match = re.match(
-        r"^\s*(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})\s*$",
-        date_time)
+    match = (
+        re.match(r"^\s*(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})\s*$",
+                 date_time)
+        or re.match(r"^\s*(\d{1,2}):(\d{2})\s*$", date_time)
+    )
 
     if match is None:
         raise ValueError(
-            f"Date and time '{date_time}' does not match format "
-            + "YYYY-MM-DD HH:MM.")
+            f"Date and time '{date_time}' matches neither "
+            + "'YYYY-MM-DD HH:MM' nor 'HH:MM'.")
 
-    return dt.datetime(
-        int(match.group(1)),
-        int(match.group(2)),
-        int(match.group(3)),
-        int(match.group(4)),
-        int(match.group(5)),
-        tzinfo=timezone)
+    if len(match.groups()) == 5:
+        year, month, day, hour, minute = tuple(int(x)
+                                               for x in match.groups())
+    else:
+        today = dt.date.today()
+
+        year, month, day = today.year, today.month, today.day
+        hour, minute = tuple(int(x) for x in match.groups())
+
+    return dt.datetime(year, month, day, hour, minute, tzinfo=timezone)
 
 
 def format_datetime(obj: dt.datetime) -> str:
