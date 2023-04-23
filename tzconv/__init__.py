@@ -82,7 +82,7 @@ def match_time_zone_abbreviation(pattern: str,
 
     while True:
         if pattern_index == len(pattern_segments):
-            return True
+            break
 
         if time_zone_index == len(time_zone_segments):
             # The pattern has leftover segments but the time zone is
