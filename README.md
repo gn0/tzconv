@@ -27,34 +27,35 @@ $ python3 -m pip install --user ./tzconv
 ```
 $ tzconv \
     -f America/New_York \
-    -t America/Lima \
-    -t Asia/Seoul \
+    -t Pacific/Galapagos \
+    -t America/Santa_Isabel \
     "2023-04-25 10:00"
 EDT: 2023-04-25 10:00 (America/New_York)
--05: 2023-04-25 09:00 (America/Lima)
-KST: 2023-04-25 23:00 (Asia/Seoul)
+-06: 2023-04-25 08:00 (Pacific/Galapagos)
+PDT: 2023-04-25 07:00 (America/Santa_Isabel)
 $
 ```
 
-Time zone names can be shortened as long as they remain unique:
+Time zone names can be shortened as long as they remain unique.
+Initials, prefixes, and abbreviations are all recognized:
 
 ```
 $ tzconv \
-    -f america/ne \
-    -t america/li \
-    -t asia/se \
+    -f ny \
+    -t gal \
+    -t san_i \
     "2023-04-25 10:00"
 EDT: 2023-04-25 10:00 (America/New_York)
--05: 2023-04-25 09:00 (America/Lima)
-KST: 2023-04-25 23:00 (Asia/Seoul)
+-06: 2023-04-25 08:00 (Pacific/Galapagos)
+PDT: 2023-04-25 07:00 (America/Santa_Isabel)
 $
 ```
 
 Available time zones can be listed with the `--list-tz` option (or `-l` for short):
 
 ```
-$ tzconv -l america/n
-The following time zones are available that begin with 'america/n':
+$ tzconv -l am/n
+The following time zones are available that match 'am/n':
 
   America/Nassau, America/New_York, America/Nipigon, America/Nome,
   America/Noronha, America/North_Dakota/Beulah, America/North_Dakota/Center,
@@ -67,7 +68,7 @@ $
 If the date is omitted, today's date is imputed:
 
 ```
-$ tzconv -f america/ne -t africa/ad 10:00
+$ tzconv -f ny -t aa 10:00
 EDT: 2023-04-20 10:00 (America/New_York)
 EAT: 2023-04-20 17:00 (Africa/Addis_Ababa)
 $
@@ -77,7 +78,7 @@ $
 If the time is omitted, too, then `tzconv` imputes the current time:
 
 ```
-$ tzconv -f america/ne -t africa/ad
+$ tzconv -f ny -t aa
 EDT: 2023-04-20 15:03 (America/New_York)
 EAT: 2023-04-20 22:03 (Africa/Addis_Ababa)
 $
@@ -91,13 +92,13 @@ For example, in March 2023, New York switched to daylight savings two weeks earl
 Notice the switch from EST/CET to EDT/CET, and finally to EDT/CEST:
 
 ```
-$ tzconv -f America/New_York -t Europe/Budapest "2023-03-07 10:00"
+$ tzconv -f ny -t bud "2023-03-07 10:00"
 EST: 2023-03-07 10:00 (America/New_York)
 CET: 2023-03-07 16:00 (Europe/Budapest)
-$ tzconv -f America/New_York -t Europe/Budapest "2023-03-14 10:00"
+$ tzconv -f ny -t bud "2023-03-14 10:00"
 EDT: 2023-03-14 10:00 (America/New_York)
 CET: 2023-03-14 15:00 (Europe/Budapest)
-$ tzconv -f America/New_York -t Europe/Budapest "2023-03-28 10:00"
+$ tzconv -f ny -t bud "2023-03-28 10:00"
 EDT: 2023-03-28 10:00 (America/New_York)
 CEST: 2023-03-28 16:00 (Europe/Budapest)
 $
