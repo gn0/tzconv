@@ -46,51 +46,57 @@ def format_datetime(obj: dt.datetime) -> str:
     return f"{tz_name}: {obj.strftime('%Y-%m-%d %H:%M')} ({tz_key})"
 
 
-def get_time_zones(stub: str | None) -> set:
-    """Get the names of those time zones that match `stub`.  If `stub`
-    is None, then get all available time zones."""
+def match_time_zone(pattern: str, time_zone: str) -> bool:
+    """Predicate that returns True if `pattern` matches `time_zone`."""
+
+    return time_zone.lower().startswith(pattern.lower())
+
+
+def get_time_zones(pattern: str | None) -> set:
+    """Get the names of those time zones that match `pattern`.  If
+    `pattern` is None, then get all available time zones."""
 
     time_zones = zi.available_timezones()
 
-    if stub is not None:
+    if pattern is not None:
         time_zones = set(
             name
             for name in time_zones
-            if name.lower().startswith(stub.lower()))
+            if match_time_zone(pattern, name))
 
     return time_zones
 
 
-def get_time_zone(stub: str) -> str:
-    """Get the name of the time zone that matches `stub`.  Raises
+def get_time_zone(pattern: str) -> str:
+    """Get the name of the time zone that matches `pattern`.  Raises
     `ValueError` if there is no match or more than one match."""
 
-    time_zones = get_time_zones(stub)
+    time_zones = get_time_zones(pattern)
 
     if len(time_zones) == 0:
-        raise ValueError(f"No available time zone matches '{stub}'.")
+        raise ValueError(f"No available time zone matches '{pattern}'.")
 
     if len(time_zones) > 1:
         raise ValueError(
-            f"Multiple available time zones are matched by '{stub}': "
-            + f"{', '.join(sorted(time_zones))}.")
+            "Multiple available time zones are matched by "
+            + f"'{pattern}': {', '.join(sorted(time_zones))}.")
 
     return time_zones.pop()
 
 
-def print_time_zones(stub: str | None) -> None:
-    """Print all available time zones whose names begin with `stub`.  If
-    `stub` is `None`, then print everything."""
+def print_time_zones(pattern: str | None) -> None:
+    """Print all available time zones whose names matches `pattern`.  If
+    `pattern` is `None`, then print everything."""
 
-    time_zones = get_time_zones(stub)
+    time_zones = get_time_zones(pattern)
 
-    if stub is not None:
+    if pattern is not None:
         if len(time_zones) == 0:
-            print(f"No available time zone begins with '{stub}'.")
+            print(f"No available time zone matches '{pattern}'.")
             return
 
-        print("The following time zones are available that begin with "
-            + f"'{stub}':\n")
+        print("The following time zones are available that matches "
+              + f"'{pattern}':\n")
     else:
         print("The following time zones are available:\n")
 
