@@ -189,7 +189,7 @@ def get_time_zone(pattern: str) -> str:
 
 
 def print_time_zones(pattern: str | None) -> None:
-    """Print all available time zones whose names matches `pattern`.  If
+    """Print all available time zones whose names match `pattern`.  If
     `pattern` is `None`, then print everything."""
 
     time_zones = get_time_zones(pattern)
@@ -199,7 +199,7 @@ def print_time_zones(pattern: str | None) -> None:
             print(f"No available time zone matches '{pattern}'.")
             return
 
-        print("The following time zones are available that matches "
+        print("The following time zones are available that match "
               + f"'{pattern}':\n")
     else:
         print("The following time zones are available:\n")
