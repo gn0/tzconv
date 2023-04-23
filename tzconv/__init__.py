@@ -3,7 +3,7 @@ import re
 import datetime as dt
 import zoneinfo as zi
 
-from typing import cast
+from typing import List, cast
 
 import click
 
@@ -46,10 +46,114 @@ def format_datetime(obj: dt.datetime) -> str:
     return f"{tz_name}: {obj.strftime('%Y-%m-%d %H:%M')} ({tz_key})"
 
 
-def match_time_zone(pattern: str, time_zone: str) -> bool:
-    """Predicate that returns True if `pattern` matches `time_zone`."""
+def match_time_zone_prefix(pattern: str, time_zone: str) -> bool:
+    """Predicate that returns True if `pattern` is a prefix of
+    `time_zone`.  Case-sensitive."""
 
-    return time_zone.lower().startswith(pattern.lower())
+    return time_zone.startswith(pattern)
+
+
+def match_time_zone_abbreviation(pattern: str,
+                                 time_zone: str) -> bool:
+    """Predicate that returns True if `pattern` is an abbreviation of
+    `time_zone`.  Case-sensitive."""
+
+    def get_segments(string: str) -> List[str]:
+        return re.findall(r"/?[a-z_]+", string, flags=re.IGNORECASE)
+
+    def get_words(string: str) -> List[str]:
+        return re.findall(r"[_]?[a-z]+", string, flags=re.IGNORECASE)
+
+    def get_initials(string: str) -> str:
+        return "".join(re.findall(r"([a-z])[a-z]*",
+                                  string,
+                                  flags=re.IGNORECASE))
+
+    pattern_segments = get_segments(pattern)
+    time_zone_segments = get_segments(time_zone)
+
+    if len(pattern_segments) > len(time_zone_segments):
+        # Shortcut since pattern cannot match.
+        #
+        return False
+
+    pattern_index = 0
+    time_zone_index = 0
+
+    while True:
+        if pattern_index == len(pattern_segments):
+            return True
+
+        if time_zone_index == len(time_zone_segments):
+            # The pattern has leftover segments but the time zone is
+            # exhausted.
+            #
+            return False
+
+        pattern_segment = pattern_segments[pattern_index]
+        time_zone_segment = time_zone_segments[time_zone_index]
+
+        # Check if the pattern segment is a prefix of the time zone
+        # segment.  E.g., "Lo" for "Los_Angeles".
+        #
+
+        if match_time_zone_prefix(pattern_segment, time_zone_segment):
+            pattern_index += 1
+            time_zone_index += 1
+
+            continue
+
+        # Check if the pattern segment is the initials of the time zone
+        # words.  E.g., "LA" for "Los_Angeles".
+        #
+
+        pattern_words = get_words(pattern_segment)
+
+        if len(pattern_words) == 1:
+            time_zone_initials = get_initials(time_zone_segment)
+
+            if pattern_words[0] == time_zone_initials:
+                pattern_index += 1
+                time_zone_index += 1
+
+                continue
+
+        # Check if the pattern segment is an abbreviation of the time
+        # zone segment.  E.g., "L_Ang" for "Los_Angeles".
+        #
+
+        time_zone_words = get_words(time_zone_segment)
+
+        if len(pattern_words) <= len(time_zone_words):
+            for pattern_word, time_zone_word in zip(pattern_words,
+                                                    time_zone_words):
+                if not match_time_zone_prefix(pattern_word,
+                                              time_zone_word):
+                    break
+            else:
+                pattern_index += 1
+                time_zone_index += 1
+
+                continue
+
+        # Try this pattern segment on the next time zone segment.
+        #
+        time_zone_index += 1
+
+    return True
+
+
+def match_time_zone(pattern: str, time_zone: str) -> bool:
+    """Predicate that returns True if `pattern` matches `time_zone`.
+    Case-insensitive."""
+
+    lowercase_pattern = pattern.lower().replace("-", "_")
+    lowercase_time_zone = time_zone.lower().replace("-", "_")
+
+    return (match_time_zone_prefix(lowercase_pattern,
+                                   lowercase_time_zone)
+            or match_time_zone_abbreviation(lowercase_pattern,
+                                            lowercase_time_zone))
 
 
 def get_time_zones(pattern: str | None) -> set:
