@@ -252,7 +252,8 @@ def print_argument_error_and_exit(message: str) -> None:
                     + "this option multiple times in order to specify "
                     + "several."))
 @click.argument("date_time", required=False, type=str)
-def main(from_tz, to_tz, date_time, list_tz=False, debug=False):
+def main(from_tz: str | None, to_tz: List[str], date_time: str | None,
+         list_tz: bool = False, debug: bool = False) -> None:
     if not debug:
         sys.tracebacklimit = 0
 
