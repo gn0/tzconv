@@ -3,7 +3,7 @@ import re
 import datetime as dt
 import zoneinfo as zi
 
-from typing import List, cast
+from typing import List, Set, cast
 
 import click
 
@@ -46,17 +46,9 @@ def format_datetime(obj: dt.datetime) -> str:
     return f"{tz_name}: {obj.strftime('%Y-%m-%d %H:%M')} ({tz_key})"
 
 
-def match_time_zone_prefix(pattern: str, time_zone: str) -> bool:
-    """Predicate that returns True if `pattern` is a prefix of
-    `time_zone`.  Case-sensitive."""
-
-    return time_zone.startswith(pattern)
-
-
-def match_time_zone_abbreviation(pattern: str,
-                                 time_zone: str) -> bool:
-    """Predicate that returns True if `pattern` is an abbreviation of
-    `time_zone`.  Case-sensitive."""
+def match_time_zone(pattern: str, time_zone: str) -> bool:
+    """Predicate that returns True if `pattern` matches `time_zone`.
+    Case-sensitive."""
 
     def get_segments(string: str) -> List[str]:
         return re.findall(r"/?[a-z_]+", string, flags=re.IGNORECASE)
@@ -97,7 +89,7 @@ def match_time_zone_abbreviation(pattern: str,
         # segment.  E.g., "Lo" for "Los_Angeles".
         #
 
-        if match_time_zone_prefix(pattern_segment, time_zone_segment):
+        if time_zone_segment.startswith(pattern_segment):
             pattern_index += 1
             time_zone_index += 1
 
@@ -127,8 +119,7 @@ def match_time_zone_abbreviation(pattern: str,
         if len(pattern_words) <= len(time_zone_words):
             for pattern_word, time_zone_word in zip(pattern_words,
                                                     time_zone_words):
-                if not match_time_zone_prefix(pattern_word,
-                                              time_zone_word):
+                if not time_zone_word.startswith(pattern_word):
                     break
             else:
                 pattern_index += 1
@@ -143,58 +134,59 @@ def match_time_zone_abbreviation(pattern: str,
     return True
 
 
-def match_time_zone(pattern: str, time_zone: str) -> bool:
-    """Predicate that returns True if `pattern` matches `time_zone`.
-    Case-insensitive."""
+def get_time_zones(pattern: str, time_zones: Set[str]) -> Set[str]:
+    """Get the subset of `time_zones` that matches `pattern`.
+    Case-insensitive and treats hyphens and underscores as the same."""
 
-    lowercase_pattern = pattern.lower().replace("-", "_")
-    lowercase_time_zone = time_zone.lower().replace("-", "_")
+    def normalize(string: str) -> str:
+        return string.lower().replace("-", "_")
 
-    return (match_time_zone_prefix(lowercase_pattern,
-                                   lowercase_time_zone)
-            or match_time_zone_abbreviation(lowercase_pattern,
-                                            lowercase_time_zone))
+    normalized_pattern = normalize(pattern)
 
-
-def get_time_zones(pattern: str | None) -> set:
-    """Get the names of those time zones that match `pattern`.  If
-    `pattern` is None, then get all available time zones."""
-
-    time_zones = zi.available_timezones()
-
-    if pattern is not None:
-        time_zones = set(
-            name
-            for name in time_zones
-            if match_time_zone(pattern, name))
-
-    return time_zones
+    return {
+        name
+        for name in time_zones
+        if match_time_zone(
+                normalized_pattern, normalize(name))
+    }
 
 
-def get_time_zone(pattern: str) -> str:
-    """Get the name of the time zone that matches `pattern`.  Raises
-    `ValueError` if there is no match or more than one match."""
+def get_unique_time_zone(pattern: str, time_zones: Set[str]) -> str:
+    """Get the unique value from `time_zones` that matches `pattern`.
+    Raises `ValueError` if there is no match or there is more than one
+    match and none of them are exact.  Case-insensitive and treats
+    hyphens and underscores as the same."""
 
-    time_zones = get_time_zones(pattern)
+    matching_tz = get_time_zones(pattern, time_zones)
 
-    if len(time_zones) == 0:
+    if len(matching_tz) == 0:
         raise ValueError(f"No available time zone matches '{pattern}'.")
 
-    if len(time_zones) > 1:
-        raise ValueError(
-            "Multiple available time zones are matched by "
-            + f"'{pattern}': {', '.join(sorted(time_zones))}.")
+    if len(matching_tz) == 1:
+        return matching_tz.pop()
 
-    return time_zones.pop()
+    # More than one match.
+    #
+
+    exact_match = {
+        x for x in matching_tz if x.lower() == pattern.lower()
+    }
+
+    if len(exact_match) == 1:
+        return exact_match.pop()
+
+    raise ValueError(
+        f"Multiple available time zones are matched by '{pattern}': "
+        + f"{', '.join(sorted(matching_tz))}.")
 
 
-def print_time_zones(pattern: str | None) -> None:
+def print_time_zones(pattern: str | None, time_zones: Set[str]) -> None:
     """Print all available time zones whose names match `pattern`.  If
     `pattern` is `None`, then print everything."""
 
-    time_zones = get_time_zones(pattern)
-
     if pattern is not None:
+        time_zones = get_time_zones(pattern, time_zones)
+
         if len(time_zones) == 0:
             print(f"No available time zone matches '{pattern}'.")
             return
@@ -263,7 +255,9 @@ def main(from_tz: str | None, to_tz: List[str], date_time: str | None,
                 "--list-tz cannot be used together with --from-tz or "
                 "--to-tz.")
 
-        print_time_zones(date_time)
+        print_time_zones(
+            pattern=date_time,
+            time_zones=zi.available_timezones())
     elif from_tz is None and len(to_tz) == 0:
         print_argument_error_and_exit(
             "Must specify either --list-tz or --from-tz and --to-tz.")
@@ -274,8 +268,14 @@ def main(from_tz: str | None, to_tz: List[str], date_time: str | None,
         print_argument_error_and_exit(
             "Must specify --to-tz if using --from-tz.")
     else:
-        from_tz_obj = zi.ZoneInfo(get_time_zone(from_tz))
-        to_tz_objs = [zi.ZoneInfo(get_time_zone(x)) for x in to_tz]
+        all_time_zones = zi.available_timezones()
+
+        from_tz_obj = zi.ZoneInfo(get_unique_time_zone(from_tz,
+                                                       all_time_zones))
+        to_tz_objs = [
+            zi.ZoneInfo(get_unique_time_zone(x, all_time_zones))
+            for x in to_tz
+        ]
 
         if date_time is None:
             base_dt = dt.datetime.now(tz=from_tz_obj)
