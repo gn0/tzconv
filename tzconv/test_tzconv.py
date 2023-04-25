@@ -71,7 +71,7 @@ class GetUniqueTimeZone(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.get_unique_time_zone("foo/bar", {"foo/baz", "bar"})
 
-    def get_unique_time_zone_is_case_insensitive(self):
+    def test_match_is_case_insensitive(self):
         self.assertEqual(
             "Foo/Bar",
             m.get_unique_time_zone("foo/bar", {"Foo/Bar", "Foo/Bart"}))
