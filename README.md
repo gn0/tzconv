@@ -14,7 +14,7 @@ $ python3 -m pip install tzconv
 Alternatively, you can install it directly from the Codeberg Git repository:
 
 ```
-$ git clone https://codeberg.org/gnyeki/tzconv
+$ git clone https://github.com/gn0/tzconv
 $ python3 -m pip install --user ./tzconv
 ```
 
