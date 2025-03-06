@@ -13,7 +13,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     author="Gabor Nyeki",
-    url="https://codeberg.org/gnyeki/tzconv",
+    url="https://github.com/gn0/tzconv",
     packages=["tzconv"],
     install_requires=["click"],
     entry_points={
