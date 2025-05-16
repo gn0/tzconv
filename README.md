@@ -106,12 +106,15 @@ $
 
 ### Custom shell commands for common conversions
 
-If you have a project that spans several time zones, it is convenient to define a command for it in your `.bashrc`, `.zshrc`, or equivalent dot file, depending on what shell you use.
-For example, if you are using zsh, you can add the following to `~/.zshrc`:
+If you have a project that spans several time zones, it is convenient to define a shell command for it.
+The shell command can also eliminate the need for enclosing date-time values in quotes.
+For example, you can add the following to your shell's startup file (`~/.zshrc`, `~/.bashrc`, or `~/.kshrc`):
 
 ```sh
 project_tz() {
-    declare -a opts=(
+    typeset -a opts
+
+    opts=(
         --from-tz America/New_York
         --to-tz America/Los_Angeles
         --to-tz America/Halifax
@@ -120,14 +123,14 @@ project_tz() {
     )
 
     if [ "$*" = "" ]; then
-        tzconv $opts
+        tzconv ${opts[@]}
     else
-        tzconv $opts "$*"
+        tzconv ${opts[@]} "$*"
     fi
 }
 ```
 
-Now you can reload `~/.zshrc` and use `project_tz` as a shell command:
+Now you can reload the startup file and use `project_tz` as a shell command:
 
 ```
 $ . ~/.zshrc
