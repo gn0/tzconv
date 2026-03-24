@@ -11,7 +11,7 @@ This Python package provides a small command-line utility to convert a `YYYY-MM-
 $ python3 -m pip install tzconv
 ```
 
-Alternatively, you can install it directly from the Codeberg Git repository:
+Alternatively, you can install it directly from the GitHub Git repository:
 
 ```
 $ git clone https://github.com/gn0/tzconv
